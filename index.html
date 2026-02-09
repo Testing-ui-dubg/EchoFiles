@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Secure Files</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Orbitron',sans-serif}
+body{
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#050510;
+color:#fff;
+overflow:hidden
+}
+.bg{
+position:absolute;
+width:300%;
+height:300%;
+background:linear-gradient(120deg,#00f0ff,#7f00ff,#ff008c);
+animation:spin 18s linear infinite;
+filter:blur(140px);
+opacity:.22
+}
+@keyframes spin{
+0%{transform:translate(-30%,-30%) rotate(0deg)}
+100%{transform:translate(-30%,-30%) rotate(360deg)}
+}
+.card{
+position:relative;
+z-index:1;
+background:rgba(0,0,0,.6);
+border-radius:22px;
+padding:45px 55px;
+text-align:center;
+box-shadow:0 0 50px rgba(0,255,255,.35)
+}
+h1{
+font-size:30px;
+letter-spacing:3px;
+margin-bottom:12px
+}
+.sub{
+opacity:.75;
+margin-bottom:35px
+}
+.timer{
+display:flex;
+gap:22px;
+justify-content:center
+}
+.box{
+background:rgba(255,255,255,.08);
+border-radius:14px;
+padding:22px;
+min-width:95px;
+box-shadow:inset 0 0 25px rgba(0,255,255,.3)
+}
+.num{
+font-size:38px;
+color:#00f0ff
+}
+.label{
+font-size:11px;
+opacity:.7;
+margin-top:6px;
+letter-spacing:1px
+}
+.note{
+margin-top:32px;
+font-size:12px;
+opacity:.6
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="card">
+<h1>FILES ENCRYPTED</h1>
+<div class="sub">Decryption timer initiated</div>
+<div class="timer">
+<div class="box"><div class="num" id="h">00</div><div class="label">HOURS</div></div>
+<div class="box"><div class="num" id="m">00</div><div class="label">MINUTES</div></div>
+<div class="box"><div class="num" id="s">00</div><div class="label">SECONDS</div></div>
+</div>
+<div class="note">System activity is being monitored</div>
+</div>
+<script>
+let key="countdown_end"
+let end=localStorage.getItem(key)
+if(!end){
+end=Date.now()+86400000
+localStorage.setItem(key,end)
+}
+end=parseInt(end)
+setInterval(()=>{
+let t=end-Date.now()
+if(t<0)t=0
+let h=Math.floor(t/3600000)
+let m=Math.floor(t%3600000/60000)
+let s=Math.floor(t%60000/1000)
+document.getElementById("h").textContent=String(h).padStart(2,"0")
+document.getElementById("m").textContent=String(m).padStart(2,"0")
+document.getElementById("s").textContent=String(s).padStart(2,"0")
+},1000)
+</script>
+</body>
+</html>
