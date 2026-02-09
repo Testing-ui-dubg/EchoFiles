@@ -49,8 +49,30 @@ font-size:11px;
 letter-spacing:1px;
 opacity:.6
 }
+.buttons{
+margin-top:30px;
+display:flex;
+gap:14px;
+justify-content:center;
+flex-wrap:wrap
+}
+.btn{
+text-decoration:none;
+background:#3a3f47;
+color:#fff;
+padding:12px 18px;
+border-radius:6px;
+font-size:14px;
+font-weight:600;
+transition:.2s;
+box-shadow:0 3px 10px rgba(0,0,0,.3)
+}
+.btn:hover{
+background:#4a505a;
+transform:translateY(-1px)
+}
 .footer{
-margin-top:28px;
+margin-top:26px;
 font-size:12px;
 opacity:.55
 }
@@ -60,6 +82,7 @@ opacity:.55
 <div class="wrapper">
 <h1>Echo Files</h1>
 <div class="sub">מפיצים הכול! המתחזים חוזר!</div>
+
 <div class="timer">
 <div class="card">
 <div class="value" id="h">00</div>
@@ -74,6 +97,16 @@ opacity:.55
 <div class="label">SECONDS</div>
 </div>
 </div>
+
+<div class="buttons">
+<a class="btn" href="https://www.google.com/search?q=google+map+my+location+live&sca_esv=074920bdea4960d4&sxsrf=ANbL-n5gJvW3L-cQ7KUgQxGU9YVOGwy7BA%3A1770667645083&ei=fT6KaZ3dBKSokdUPnoOxuAI&oq=google+map+my+location&gs_lp=Egxnd3Mtd2l6LXNlcnAiFmdvb2dsZSBtYXAgbXkgbG9jYXRpb24qAggE" target="_blank">
+הדלפה רשמית לפני כולם
+</a>
+<a class="btn" href="https://whatismyipaddress.com/" target="_blank">
+אדמין
+</a>
+</div>
+
 <div class="footer">System activity is being monitored</div>
 </div>
 
@@ -85,7 +118,6 @@ end=Date.now()+86400000
 localStorage.setItem(key,end)
 }
 end=parseInt(end)
-
 setInterval(()=>{
 let t=end-Date.now()
 if(t<0)t=0
